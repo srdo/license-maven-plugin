@@ -94,7 +94,7 @@ extends AbstractLogEnabled
      *
      * Result is given in a map where keys are unique artifact id
      *
-     * @param dependencies       the project dependencies
+     * @param artifacts       the project dependencies
      * @param configuration      the configuration
      * @param localRepository    local repository used to resolv dependencies
      * @param remoteRepositories remote repositories used to resolv dependencies
@@ -270,7 +270,7 @@ extends AbstractLogEnabled
      * @param localRepository    local repository used to resolv dependencies
      * @param remoteRepositories remote repositories used to resolv dependencies
      * @param project            the project to scan
-     * @param reactorProjectDependencies reactor projects. Optional, only relevant if there is more than one)
+     * @param reactorProjects reactor projects. Optional, only relevant if there is more than one)
      * @return the loaded project dependency artifacts
      * @throws DependenciesToolException if could not load project dependencies
      */
