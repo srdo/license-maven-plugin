@@ -61,7 +61,7 @@ extends AbstractLogEnabled
      */
     @Requirement
     private ProjectBuilder mavenProjectBuilder;
-
+    
     // CHECKSTYLE_OFF: MethodLength
     /**
      * For a given {@code project}, obtain the universe of its dependencies after applying transitivity and
