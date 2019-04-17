@@ -25,7 +25,6 @@ package org.codehaus.mojo.license.api;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.license.utils.MojoHelper;
 import org.codehaus.plexus.component.annotations.Component;
@@ -61,7 +60,7 @@ extends AbstractLogEnabled
      * Project builder.
      */
     @Requirement
-    private MavenProjectBuilder mavenProjectBuilder;
+    private ProjectBuilder mavenProjectBuilder;
 
     // CHECKSTYLE_OFF: MethodLength
     /**
@@ -163,8 +162,11 @@ extends AbstractLogEnabled
 
                 try
                 {
+                    ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
+                            .setRemoteRepositories( remoteRepositories )
+                            .setLocalRepository( localRepository );
                     depMavenProject =
-                        mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository, true );
+                        mavenProjectBuilder.build(artifact, true, req).getProject();
                     depMavenProject.getArtifact().setScope( artifact.getScope() );
 
                     // In case maven-metadata.xml has different artifactId, groupId or version.

@@ -29,9 +29,11 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.mojo.license.api.ArtifactFilters;
 import org.codehaus.mojo.license.api.DefaultThirdPartyTool;
 import org.codehaus.mojo.license.api.MavenProjectDependenciesConfigurator;
@@ -154,8 +156,11 @@ public class LicensedArtifactResolver
                     LicensedArtifact.builder( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion() );
                 try
                 {
-                    final MavenProject project =
-                        mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository, true );
+                    ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
+                            .setRemoteRepositories( remoteRepositories )
+                            .setLocalRepository( localRepository );
+                    
+                    final MavenProject project = mavenProjectBuilder.build( artifact, true, req ).getProject();
                     @SuppressWarnings( "unchecked" )
                     List<org.apache.maven.model.License> lics = project.getLicenses();
                     if ( lics != null )
