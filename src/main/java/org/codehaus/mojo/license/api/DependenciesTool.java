@@ -24,16 +24,13 @@ package org.codehaus.mojo.license.api;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.project.artifact.MavenMetadataSource;
@@ -54,6 +51,13 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.impl.ArtifactResolver;
 
 /**
  * A tool to deal with dependencies of a project.
@@ -76,7 +80,10 @@ extends AbstractLogEnabled
      * Project builder.
      */
     @Requirement
-    private MavenProjectBuilder mavenProjectBuilder;
+    private ProjectBuilder mavenProjectBuilder;
+    
+    @Parameter(defaultValue = "${repositorySystemSession}")
+    private RepositorySystemSession repoSession;
 
     @Requirement
     private ArtifactFactory artifactFactory;
@@ -187,8 +194,11 @@ extends AbstractLogEnabled
 
                 try
                 {
+                    ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
+                            .setRemoteRepositories( remoteRepositories )
+                            .setLocalRepository( localRepository );
                     depMavenProject =
-                        mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository, true );
+                        mavenProjectBuilder.build(artifact, true, req).getProject();
                     depMavenProject.getArtifact().setScope( artifact.getScope() );
 
                     // In case maven-metadata.xml has different artifactId, groupId or version.
@@ -437,6 +447,7 @@ extends AbstractLogEnabled
     {
         try
         {
+            return artifactResolver.re
             return artifactResolver.resolveTransitively( artifacts, projectArtifact, remoteRepositories,
                                                            localRepository, artifactMetadataSource );
         }
