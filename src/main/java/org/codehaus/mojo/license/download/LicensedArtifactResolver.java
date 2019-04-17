@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.license.api.ArtifactFilters;
 import org.codehaus.mojo.license.api.DefaultThirdPartyTool;
@@ -63,7 +63,7 @@ public class LicensedArtifactResolver
      * Project builder.
      */
     @Requirement
-    private MavenProjectBuilder mavenProjectBuilder;
+    private ProjectBuilder mavenProjectBuilder;
 
     // CHECKSTYLE_OFF: MethodLength
     /**

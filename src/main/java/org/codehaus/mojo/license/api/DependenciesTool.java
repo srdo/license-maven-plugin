@@ -302,6 +302,7 @@ extends AbstractLogEnabled
          * we need to keep track of which project the transitive dependency is declared in.
          */
         List<Dependency> directDependencies = new ArrayList<>( project.getDependencies() );
+        getLogger().info( "Direct dependencies " + directDependencies );
         Map<MavenProject, List<Dependency>> reactorProjectToTransitiveDependencies = new HashMap<>();
         Queue<Pair<MavenProject, Dependency>> dependenciesToCheck = new ArrayDeque<>();
         for ( Dependency dependency : directDependencies )
