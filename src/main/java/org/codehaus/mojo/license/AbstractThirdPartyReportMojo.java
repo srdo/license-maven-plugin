@@ -357,7 +357,6 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
 
     /**
      * Repository system session used by Aether.
-     * Injected into the setter further down, for use by other components.
      */
     @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
     private RepositorySystemSession aetherRepoSession;
@@ -365,7 +364,7 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
     /**
      * The project's remote repositories
      */
-    @org.apache.maven.plugins.annotations.Parameter( defaultValue = "${project.remotePluginRepositories}",
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue = "${project.remoteProjectRepositories}",
             required = true, readonly = true )
     private List<RemoteRepository> remoteRepos;
 
@@ -661,7 +660,7 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
     {
         return encoding;
     }
-    
+
     /**
      * Set repo session in the components that need it.
      * @param session The repository system session
@@ -669,16 +668,16 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
     public void setAetherRepoSession( RepositorySystemSession session )
     {
         aetherRepoSession = session;
-        dependenciesTool.setAetherRepoSession( session );
+        dependenciesTool.setAetherRepoSession( aetherRepoSession );
     }
-    
+
     /**
      * Set the remote repositories in the components that need it.
      * @param remoteRepositories The remote repositories
      */
-    public void setRemoteRepositories( List<RemoteRepository> remoteRepositories ) {
+    public void setRemoteRepos( List<RemoteRepository> remoteRepositories ) {
         remoteRepos = remoteRepositories;
-        thirdPartyTool.setRemoteRepositories( remoteRepositories );
+        thirdPartyTool.setRemoteRepositories( remoteRepos );
     }
 
 

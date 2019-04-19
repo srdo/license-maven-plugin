@@ -67,7 +67,7 @@ public class LicensedArtifactResolver
      */
     @Requirement
     private ProjectBuilder mavenProjectBuilder;
-    
+
     private RepositorySystemSession aetherRepoSession;
 
     // CHECKSTYLE_OFF: MethodLength

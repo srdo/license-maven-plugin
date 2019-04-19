@@ -107,10 +107,9 @@ public abstract class AbstractLicensesXmlMojo
      */
     @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
-    
+
     /**
      * Repository system session used by Aether.
-     * Injected into the setter further down, for use by other components.
      */
     @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
     private RepositorySystemSession aetherRepoSession;
@@ -191,7 +190,7 @@ public abstract class AbstractLicensesXmlMojo
         LicenseSummaryWriter.writeLicenseSummary( deps, licensesOutputFile, charset, licensesOutputFileEol,
                                                   writeVersions );
     }
-    
+
     /**
      * Set repo session in the components that need it.
      * @param session The repository system session
@@ -199,7 +198,7 @@ public abstract class AbstractLicensesXmlMojo
     public void setAetherRepoSession( RepositorySystemSession session )
     {
         aetherRepoSession = session;
-        licensedArtifactResolver.setAetherRepoSession( session );
+        licensedArtifactResolver.setAetherRepoSession( aetherRepoSession );
     }
 
 }

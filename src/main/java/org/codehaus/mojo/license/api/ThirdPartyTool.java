@@ -228,13 +228,13 @@ public interface ThirdPartyTool
      */
     void writeBundleThirdPartyFile( File thirdPartyFile, File outputDirectory, String bundleThirdPartyPath )
             throws IOException;
-    
+
     /**
      * Sets the repo session the tool will use.
      * @param aetherRepoSession The repo session
      */
     void setAetherRepoSession( RepositorySystemSession aetherRepoSession );
-    
+
     /**
      * Sets the remote repositories the tool will use.
      * @param repositories The repositories
