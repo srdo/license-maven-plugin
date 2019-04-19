@@ -59,6 +59,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import org.codehaus.mojo.license.api.DependenciesToolException;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * Abstract mojo for all third-party mojos.
@@ -606,6 +608,20 @@ public abstract class AbstractAddThirdPartyMojo
     @Parameter( property = "project.artifacts", required = true, readonly = true )
     protected Set<Artifact> dependencies;
 
+    /**
+     * Repository system session used by Aether.
+     * Injected into the setter further down, for use by other components.
+     */
+    @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
+    private RepositorySystemSession aetherRepoSession;
+
+    /**
+     * The project's remote repositories
+     */
+    @org.apache.maven.plugins.annotations.Parameter( defaultValue = "${project.remotePluginRepositories}",
+            required = true, readonly = true )
+    private List<RemoteRepository> remoteRepos;
+
     // ----------------------------------------------------------------------
     // Plexus components
     // ----------------------------------------------------------------------
@@ -870,6 +886,26 @@ public abstract class AbstractAddThirdPartyMojo
     public void setExcludedLicenses( String excludedLicenses ) throws MojoExecutionException
     {
         this.excludedLicenses = new ExcludedLicenses( excludedLicenses );
+    }
+    
+    /**
+     * Set repo session in the components that need it.
+     * @param session The repository system session
+     */
+    public void setAetherRepoSession( RepositorySystemSession session )
+    {
+        aetherRepoSession = session;
+        dependenciesTool.setAetherRepoSession( session );
+        thirdPartyTool.setAetherRepoSession( session );
+    }
+    
+    /**
+     * Set the remote repositories in the components that need it.
+     * @param remoteRepositories The remote repositories
+     */
+    public void setRemoteRepositories( List<RemoteRepository> remoteRepositories ) {
+        remoteRepos = remoteRepositories;
+        thirdPartyTool.setRemoteRepositories( remoteRepositories );
     }
 
     // ----------------------------------------------------------------------

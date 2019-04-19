@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * A tool to load third party files missing files.
@@ -226,4 +228,16 @@ public interface ThirdPartyTool
      */
     void writeBundleThirdPartyFile( File thirdPartyFile, File outputDirectory, String bundleThirdPartyPath )
             throws IOException;
+    
+    /**
+     * Sets the repo session the tool will use.
+     * @param aetherRepoSession The repo session
+     */
+    void setAetherRepoSession( RepositorySystemSession aetherRepoSession );
+    
+    /**
+     * Sets the remote repositories the tool will use.
+     * @param repositories The repositories
+     */
+    void setRemoteRepositories( List<RemoteRepository> repositories );
 }

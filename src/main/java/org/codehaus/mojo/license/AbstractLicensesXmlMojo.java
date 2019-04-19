@@ -40,6 +40,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.license.download.LicenseSummaryWriter;
 import org.codehaus.mojo.license.download.LicensedArtifactResolver;
 import org.codehaus.mojo.license.download.ProjectLicenseInfo;
+import org.eclipse.aether.RepositorySystemSession;
 
 /**
  * A common parent for {@link LicensesXmlInsertVersionsMojo} and {@link AbstractDownloadLicensesMojo}.
@@ -106,14 +107,21 @@ public abstract class AbstractLicensesXmlMojo
      */
     @Parameter( defaultValue = "${project}", readonly = true )
     protected MavenProject project;
+    
+    /**
+     * Repository system session used by Aether.
+     * Injected into the setter further down, for use by other components.
+     */
+    @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
+    private RepositorySystemSession aetherRepoSession;
 
     /**
-     * Dependencies tool.
+     * Licensed artifact resolver.
      *
      * @since 1.0
      */
     @Component
-    protected LicensedArtifactResolver dependenciesTool;
+    protected LicensedArtifactResolver licensedArtifactResolver;
 
     private Charset charset;
 
@@ -182,6 +190,16 @@ public abstract class AbstractLicensesXmlMojo
         initEncoding();
         LicenseSummaryWriter.writeLicenseSummary( deps, licensesOutputFile, charset, licensesOutputFileEol,
                                                   writeVersions );
+    }
+    
+    /**
+     * Set repo session in the components that need it.
+     * @param session The repository system session
+     */
+    public void setAetherRepoSession( RepositorySystemSession session )
+    {
+        aetherRepoSession = session;
+        licensedArtifactResolver.setAetherRepoSession( session );
     }
 
 }

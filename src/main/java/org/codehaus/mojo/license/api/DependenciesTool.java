@@ -38,6 +38,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingRequest;
+import org.eclipse.aether.RepositorySystemSession;
 
 /**
  * A tool to deal with dependencies of a project.
@@ -61,7 +65,12 @@ extends AbstractLogEnabled
      */
     @Requirement
     private ProjectBuilder mavenProjectBuilder;
-    
+
+    /**
+     * Maven Artifact Resolver repoSystemSession
+    */
+    private RepositorySystemSession aetherRepoSession;
+
     // CHECKSTYLE_OFF: MethodLength
     /**
      * For a given {@code project}, obtain the universe of its dependencies after applying transitivity and
@@ -163,6 +172,7 @@ extends AbstractLogEnabled
                 try
                 {
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
+                            .setRepositorySession( aetherRepoSession )
                             .setRemoteRepositories( remoteRepositories )
                             .setLocalRepository( localRepository );
                     depMavenProject =
@@ -241,4 +251,9 @@ extends AbstractLogEnabled
         return result;
     }
     // CHECKSTYLE_ON: MethodLength
+
+    public void setAetherRepoSession( RepositorySystemSession aetherRepoSession )
+    {
+        this.aetherRepoSession = aetherRepoSession;
+    }
 }

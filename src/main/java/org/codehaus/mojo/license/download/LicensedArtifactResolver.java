@@ -43,6 +43,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.eclipse.aether.RepositorySystemSession;
 
 /**
  * A tool to deal with dependencies of a project.
@@ -66,6 +67,8 @@ public class LicensedArtifactResolver
      */
     @Requirement
     private ProjectBuilder mavenProjectBuilder;
+    
+    private RepositorySystemSession aetherRepoSession;
 
     // CHECKSTYLE_OFF: MethodLength
     /**
@@ -158,8 +161,9 @@ public class LicensedArtifactResolver
                 {
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRemoteRepositories( remoteRepositories )
-                            .setLocalRepository( localRepository );
-                    
+                            .setLocalRepository( localRepository )
+                            .setRepositorySession( aetherRepoSession );
+
                     final MavenProject project = mavenProjectBuilder.build( artifact, true, req ).getProject();
                     @SuppressWarnings( "unchecked" )
                     List<org.apache.maven.model.License> lics = project.getLicenses();
@@ -221,4 +225,8 @@ public class LicensedArtifactResolver
     }
     // CHECKSTYLE_ON: MethodLength
 
+    public void setAetherRepoSession( RepositorySystemSession aetherRepoSession )
+    {
+        this.aetherRepoSession = aetherRepoSession;
+    }
 }

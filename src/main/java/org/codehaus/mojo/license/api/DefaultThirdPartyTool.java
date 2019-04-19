@@ -47,7 +47,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -55,6 +54,7 @@ import org.apache.maven.model.License;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.license.LicenseMojoUtils;
 import org.codehaus.mojo.license.model.LicenseMap;
 import org.codehaus.mojo.license.utils.FileUtil;
@@ -65,6 +65,12 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.artifact.DefaultArtifactType;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 /**
  * Default implementation of the third party tool.
@@ -105,16 +111,26 @@ public class DefaultThirdPartyTool
     // ----------------------------------------------------------------------
 
     /**
-     * The component that is used to resolve additional artifacts required.
-     */
-    @Requirement
-    private ArtifactResolver artifactResolver;
-
-    /**
      * The component used for creating artifact instances.
      */
     @Requirement
-    private ArtifactFactory artifactFactory;
+    private RepositorySystem repositorySystem;
+
+    /**
+     * Maven Artifact Resolver repoSystem
+     */
+    @Requirement
+    private org.eclipse.aether.RepositorySystem aetherRepoSystem;
+
+    /**
+     * Maven Artifact Resolver repoSystemSession
+    */
+    private RepositorySystemSession aetherRepoSession;
+
+    /**
+     * The project's remote repositories
+     */
+    private List<RemoteRepository> remoteRepos;
 
     /**
      * Maven ProjectHelper.
@@ -713,8 +729,8 @@ public class DefaultThirdPartyTool
                                    SortedProperties result )
             throws IOException, ArtifactNotFoundException, ArtifactResolutionException
     {
-        artifactResolver.resolve( dep, repositories, localRepository );
-        File propFile = dep.getFile();
+        File propFile = resolveArtifact( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getType(),
+                dep.getClassifier(), localRepository, repositories );
         getLogger().info(
                 String.format( "Loading global license map from %s: %s", dep.toString(), propFile.getAbsolutePath() ) );
         SortedProperties props = new SortedProperties( "utf-8" );
@@ -774,7 +790,7 @@ public class DefaultThirdPartyTool
             getLogger().debug( "Unable to locate third party files descriptor : " + e );
 
             Artifact artifact = e.getArtifact() == null
-                    ? artifactFactory.createArtifactWithClassifier(
+                    ? repositorySystem.createArtifactWithClassifier(
                     project.getGroupId(), project.getArtifactId(), project.getVersion(),
                     DESCRIPTOR_TYPE, DESCRIPTOR_CLASSIFIER )
                     : e.getArtifact();
@@ -800,12 +816,24 @@ public class DefaultThirdPartyTool
                     throws ArtifactResolutionException, IOException, ArtifactNotFoundException
     {
         // TODO: this is a bit crude - proper type, or proper handling as metadata rather than an artifact in 2.1?
-        Artifact artifact = artifactFactory.createArtifactWithClassifier( groupId, artifactId, version, type,
-                                                                          classifier );
+        Artifact artifact = repositorySystem.createArtifactWithClassifier( groupId, artifactId, version, type,
+                classifier );
 
-        artifactResolver.resolve( artifact, repositories, localRepository );
+        org.eclipse.aether.artifact.Artifact artifact2
+                = new DefaultArtifact( groupId, artifactId, classifier, null, version, new DefaultArtifactType( type ) );
+        ArtifactRequest artifactRequest = new ArtifactRequest()
+                .setArtifact( artifact2 )
+                .setRepositories( remoteRepos );
+        try
+        {
+            ArtifactResult result = aetherRepoSystem.resolveArtifact( aetherRepoSession, artifactRequest );
 
-        return artifact.getFile();
+            return result.getArtifact().getFile();
+        }
+        catch ( org.eclipse.aether.resolution.ArtifactResolutionException e )
+        {
+            throw new ArtifactResolutionException( "Broken", artifact, e );
+        }
     }
 
     private Map<String, String> migrateMissingFileKeys( Set<Object> missingFileKeys )
@@ -835,5 +863,17 @@ public class DefaultThirdPartyTool
             migrateKeys.put( id, newId );
         }
         return migrateKeys;
+    }
+
+    @Override
+    public void setAetherRepoSession( RepositorySystemSession aetherRepoSession )
+    {
+        this.aetherRepoSession = aetherRepoSession;
+    }
+
+    @Override
+    public void setRemoteRepositories( List<RemoteRepository> repositories )
+    {
+        this.remoteRepos = repositories;
     }
 }
