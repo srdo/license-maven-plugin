@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -60,6 +59,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import org.codehaus.mojo.license.api.DependenciesToolException;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 
 /**
  * Abstract mojo for all third-party mojos.

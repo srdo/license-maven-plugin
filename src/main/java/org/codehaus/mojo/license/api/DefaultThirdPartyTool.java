@@ -47,9 +47,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.model.License;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -70,6 +68,7 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.artifact.DefaultArtifactType;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 
 /**
@@ -109,12 +108,6 @@ public class DefaultThirdPartyTool
     // ----------------------------------------------------------------------
     // Components
     // ----------------------------------------------------------------------
-
-    /**
-     * The component used for creating artifact instances.
-     */
-    @Requirement
-    private RepositorySystem repositorySystem;
 
     /**
      * Maven Artifact Resolver repoSystem
@@ -809,24 +802,14 @@ public class DefaultThirdPartyTool
                     throws ArtifactResolutionException, IOException, ArtifactNotFoundException
     {
         // TODO: this is a bit crude - proper type, or proper handling as metadata rather than an artifact in 2.1?
-        Artifact artifact = repositorySystem.createArtifactWithClassifier( groupId, artifactId, version, type,
-                classifier );
-
         org.eclipse.aether.artifact.Artifact artifact2
                 = new DefaultArtifact( groupId, artifactId, classifier, null, version, new DefaultArtifactType( type ) );
         ArtifactRequest artifactRequest = new ArtifactRequest()
                 .setArtifact( artifact2 )
                 .setRepositories( remoteRepositories );
-        try
-        {
-            ArtifactResult result = aetherRepoSystem.resolveArtifact( aetherRepoSession, artifactRequest );
+        ArtifactResult result = aetherRepoSystem.resolveArtifact( aetherRepoSession, artifactRequest );
 
-            return result.getArtifact().getFile();
-        }
-        catch ( org.eclipse.aether.resolution.ArtifactResolutionException e )
-        {
-            throw new ArtifactResolutionException( "Broken", artifact, e );
-        }
+        return result.getArtifact().getFile();
     }
 
     private Map<String, String> migrateMissingFileKeys( Set<Object> missingFileKeys )
