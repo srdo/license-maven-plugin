@@ -23,7 +23,6 @@ package org.codehaus.mojo.license;
  */
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.doxia.siterenderer.Renderer;
@@ -653,6 +652,7 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
     {
         aetherRepoSession = session;
         dependenciesTool.setAetherRepoSession( aetherRepoSession );
+        thirdPartyTool.setAetherRepoSession( aetherRepoSession );
     }
 
 }

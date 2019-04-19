@@ -171,6 +171,13 @@ extends AbstractLogEnabled
 
                 try
                 {
+                    /*
+                     * Some POMs may refer to e.g. java.home or java.version,
+                     * so we need to ensure common system properties are set when parsing POMs.
+                     * Using the current system properties seems like a decent solution.
+                     */
+                    Properties props = new Properties();
+                    props.putAll( System.getProperties() );
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRepositorySession( aetherRepoSession )
                             .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
@@ -179,11 +186,10 @@ extends AbstractLogEnabled
                             .setResolveDependencies( false )
                             //We don't care about plugin licensing
                             .setProcessPlugins( false )
-                            //Some POMs may refer to e.g. java.home, so use current system properties for variable interpolation
-                            .setSystemProperties( new Properties( System.getProperties() ) )
+                            .setSystemProperties( props )
                             .setRemoteRepositories( remoteRepositories );
-                    depMavenProject =
-                        mavenProjectBuilder.build(artifact, true, req).getProject();
+                    depMavenProject
+                            = mavenProjectBuilder.build( artifact, true, req ).getProject();
                     depMavenProject.getArtifact().setScope( artifact.getScope() );
 
                     // In case maven-metadata.xml has different artifactId, groupId or version.

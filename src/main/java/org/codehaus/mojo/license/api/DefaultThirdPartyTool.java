@@ -47,12 +47,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.model.License;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.mojo.license.LicenseMojoUtils;
 import org.codehaus.mojo.license.model.LicenseMap;
 import org.codehaus.mojo.license.utils.FileUtil;
@@ -70,6 +68,7 @@ import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.transfer.ArtifactNotFoundException;
 
 /**
  * Default implementation of the third party tool.
@@ -766,25 +765,38 @@ public class DefaultThirdPartyTool
                 getLogger().debug( "Skipped third party descriptor" );
             }
         }
-        catch ( ArtifactNotFoundException e )
+        catch ( ArtifactResolutionException e )
         {
-            getLogger().debug( "Unable to locate third party files descriptor : " + e );
-
-            org.eclipse.aether.artifact.Artifact artifact;
-            if ( e.getArtifact() == null )
+            if ( e.getCause() instanceof ArtifactNotFoundException )
             {
-                artifact = new DefaultArtifact( project.getGroupId(), project.getArtifactId(), DESCRIPTOR_CLASSIFIER, null, project.getVersion(), new DefaultArtifactType( DESCRIPTOR_TYPE ) );
+                ArtifactNotFoundException artifactNotFoundException = ( ArtifactNotFoundException ) e.getCause();
+                getLogger().debug( "Unable to locate third party files descriptor : " + artifactNotFoundException );
+
+                org.eclipse.aether.artifact.Artifact artifact;
+                if ( artifactNotFoundException.getArtifact() == null )
+                {
+                    artifact = new DefaultArtifact( project.getGroupId(), project.getArtifactId(),
+                            DESCRIPTOR_CLASSIFIER, null, project.getVersion(),
+                            new DefaultArtifactType( DESCRIPTOR_TYPE ) );
+                }
+                else
+                {
+                    artifact = artifactNotFoundException.getArtifact();
+                }
+
+                /*
+                 * we can afford to write an empty descriptor here
+                 * as we don't expect it to turn up later in the remote
+                 * repository, because the parent was already released
+                 * (and snapshots are updated automatically if changed)
+                 */
+                result = new File( aetherRepoSession.getLocalRepository().getBasedir(),
+                        aetherRepoSession.getLocalRepositoryManager().getPathForLocalArtifact( artifact ) );
             }
             else
             {
-                Artifact exceptionArtifact = e.getArtifact();
-                artifact = new DefaultArtifact( exceptionArtifact.getGroupId(), e.getArtifactId(), e.getClassifier(), null, e.getVersion(), new DefaultArtifactType( e.getType() ) );
+                throw e;
             }
-
-            // we can afford to write an empty descriptor here as we don't expect it to turn up later in the remote
-            // repository, because the parent was already released (and snapshots are updated automatically if changed)
-            result = new File( aetherRepoSession.getLocalRepository().getBasedir(),
-                    aetherRepoSession.getLocalRepositoryManager().getPathForLocalArtifact( artifact ) );
         }
 
         return result;
@@ -794,16 +806,18 @@ public class DefaultThirdPartyTool
             List<RemoteRepository> remoteRepositories )
             throws IOException, ArtifactResolutionException, ArtifactNotFoundException
     {
-        return resolveArtifact( groupId, artifactId, version, DESCRIPTOR_TYPE, DESCRIPTOR_CLASSIFIER, remoteRepositories );
+        return resolveArtifact( groupId, artifactId, version, DESCRIPTOR_TYPE,
+                DESCRIPTOR_CLASSIFIER, remoteRepositories );
     }
 
     private File resolveArtifact( String groupId, String artifactId, String version,
             String type, String classifier, List<RemoteRepository> remoteRepositories )
-                    throws ArtifactResolutionException, IOException, ArtifactNotFoundException
+                    throws ArtifactResolutionException
     {
         // TODO: this is a bit crude - proper type, or proper handling as metadata rather than an artifact in 2.1?
         org.eclipse.aether.artifact.Artifact artifact2
-                = new DefaultArtifact( groupId, artifactId, classifier, null, version, new DefaultArtifactType( type ) );
+                = new DefaultArtifact( groupId, artifactId, classifier, null,
+                        version, new DefaultArtifactType( type ) );
         ArtifactRequest artifactRequest = new ArtifactRequest()
                 .setArtifact( artifact2 )
                 .setRepositories( remoteRepositories );

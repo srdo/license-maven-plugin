@@ -168,7 +168,7 @@ public class DefaultThirdPartyHelper
             throws ThirdPartyToolException, IOException
     {
         return thirdPartyTool.loadThirdPartyDescriptorsForUnsafeMapping( topLevelDependencies, encoding, projects,
-                                                                         unsafeDependencies, licenseMap, remoteRepositories );
+                unsafeDependencies, licenseMap, remoteRepositories );
     }
 
     /**

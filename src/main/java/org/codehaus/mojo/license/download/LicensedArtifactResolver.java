@@ -160,12 +160,14 @@ public class LicensedArtifactResolver
                     LicensedArtifact.builder( artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion() );
                 try
                 {
+                    Properties props = new Properties();
+                    props.putAll( System.getProperties() );
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRemoteRepositories( remoteRepositories )
                             .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
                             .setResolveDependencies( false )
                             .setProcessPlugins( false )
-                            .setSystemProperties( new Properties( System.getProperties() ) )
+                            .setSystemProperties( props )
                             .setRepositorySession( aetherRepoSession );
 
                     final MavenProject project = mavenProjectBuilder.build( artifact, true, req ).getProject();
