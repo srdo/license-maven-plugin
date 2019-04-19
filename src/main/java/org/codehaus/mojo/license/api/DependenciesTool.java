@@ -34,6 +34,7 @@ import org.codehaus.plexus.logging.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -173,6 +174,13 @@ extends AbstractLogEnabled
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRepositorySession( aetherRepoSession )
                             .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
+                            //We already have the relevant part of the dependency tree
+                            //Re-resolving risks including e.g. excluded artifacts
+                            .setResolveDependencies( false )
+                            //We don't care about plugin licensing
+                            .setProcessPlugins( false )
+                            //Some POMs may refer to e.g. java.home, so use current system properties for variable interpolation
+                            .setSystemProperties( new Properties( System.getProperties() ) )
                             .setRemoteRepositories( remoteRepositories );
                     depMavenProject =
                         mavenProjectBuilder.build(artifact, true, req).getProject();

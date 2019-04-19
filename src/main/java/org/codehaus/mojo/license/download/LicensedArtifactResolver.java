@@ -25,6 +25,7 @@ package org.codehaus.mojo.license.download;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -162,6 +163,9 @@ public class LicensedArtifactResolver
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRemoteRepositories( remoteRepositories )
                             .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
+                            .setResolveDependencies( false )
+                            .setProcessPlugins( false )
+                            .setSystemProperties( new Properties( System.getProperties() ) )
                             .setRepositorySession( aetherRepoSession );
 
                     final MavenProject project = mavenProjectBuilder.build( artifact, true, req ).getProject();
