@@ -23,7 +23,6 @@ package org.codehaus.mojo.license.api;
  */
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingException;
 import org.codehaus.mojo.license.utils.MojoHelper;
@@ -38,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -78,17 +78,15 @@ extends AbstractLogEnabled
      *
      * Result is given in a map where keys are unique artifact id
      *
-     * @param dependencies       the project dependencies
+     * @param artifacts       the project dependencies
      * @param configuration      the configuration
-     * @param localRepository    local repository used to resolv dependencies
-     * @param remoteRepositories remote repositories used to resolv dependencies
+     * @param remoteRepositories remote repositories used to resolve dependencies
      * @param cache              a optional cache where to keep resolved dependencies
      * @return the map of resolved dependencies indexed by their unique id.
      * @see MavenProjectDependenciesConfigurator
      */
     public SortedMap<String, MavenProject> loadProjectDependencies( ResolvedProjectDependencies artifacts,
                                                                     MavenProjectDependenciesConfigurator configuration,
-                                                                    ArtifactRepository localRepository,
                                                                     List<ArtifactRepository> remoteRepositories,
                                                                     SortedMap<String, MavenProject> cache )
     {
@@ -173,8 +171,7 @@ extends AbstractLogEnabled
                 {
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRepositorySession( aetherRepoSession )
-                            .setRemoteRepositories( remoteRepositories )
-                            .setLocalRepository( localRepository );
+                            .setRemoteRepositories( remoteRepositories );
                     depMavenProject =
                         mavenProjectBuilder.build(artifact, true, req).getProject();
                     depMavenProject.getArtifact().setScope( artifact.getScope() );

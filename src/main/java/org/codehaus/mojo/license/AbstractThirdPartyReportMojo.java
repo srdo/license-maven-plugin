@@ -65,7 +65,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.codehaus.mojo.license.api.ResolvedProjectDependencies;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * Base class for third-party reports.
@@ -304,14 +303,6 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
     private String encoding;
 
     /**
-     * Local Repository.
-     *
-     * @since 1.1
-     */
-    @Parameter( property = "localRepository", required = true, readonly = true )
-    private ArtifactRepository localRepository;
-
-    /**
      * The Maven Project.
      *
      * @since 1.1
@@ -360,13 +351,6 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
      */
     @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
     private RepositorySystemSession aetherRepoSession;
-
-    /**
-     * The project's remote repositories
-     */
-    @org.apache.maven.plugins.annotations.Parameter( defaultValue = "${project.remoteProjectRepositories}",
-            required = true, readonly = true )
-    private List<RemoteRepository> remoteRepos;
 
     /**
      * A URL returning a plain text file that contains include/exclude artifact filters in the following format:
@@ -588,7 +572,7 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
         ThirdPartyHelper thirdPartyHelper =
                 new DefaultThirdPartyHelper( project, encoding, verbose,
                         dependenciesTool, thirdPartyTool,
-                        localRepository, project.getRemoteArtifactRepositories(), getLog() );
+                        project.getRemoteArtifactRepositories(), project.getRemoteProjectRepositories(), getLog() );
         // load dependencies of the project
         SortedMap<String, MavenProject> projectDependencies = thirdPartyHelper.loadDependencies( this,
                 loadedDependencies );
@@ -670,15 +654,5 @@ public abstract class AbstractThirdPartyReportMojo extends AbstractMavenReport
         aetherRepoSession = session;
         dependenciesTool.setAetherRepoSession( aetherRepoSession );
     }
-
-    /**
-     * Set the remote repositories in the components that need it.
-     * @param remoteRepositories The remote repositories
-     */
-    public void setRemoteRepos( List<RemoteRepository> remoteRepositories ) {
-        remoteRepos = remoteRepositories;
-        thirdPartyTool.setRemoteRepositories( remoteRepos );
-    }
-
 
 }

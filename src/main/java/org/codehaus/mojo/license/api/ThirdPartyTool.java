@@ -83,7 +83,6 @@ public interface ThirdPartyTool
      * @param projects           all projects where to read third parties descriptors
      * @param unsafeProjects     all unsafe projects
      * @param licenseMap         license map where to store new licenses
-     * @param localRepository    local repository
      * @param remoteRepositories remote repositories
      * @return the map of loaded missing from the remote missing third party files
      * @throws ThirdPartyToolException if any
@@ -93,8 +92,7 @@ public interface ThirdPartyTool
                                                                 Collection<MavenProject> projects,
                                                                 SortedSet<MavenProject> unsafeProjects,
                                                                 LicenseMap licenseMap,
-                                                                ArtifactRepository localRepository,
-                                                                List<ArtifactRepository> remoteRepositories )
+                                                                List<RemoteRepository> remoteRepositories )
             throws ThirdPartyToolException, IOException;
 
     /**
@@ -110,20 +108,18 @@ public interface ThirdPartyTool
     /**
      * Obtain the third party file from the repository.
      * <p>
-     * Will first search in the local repository, then into the remote repositories and will resolv it.
+     * Will first search in the local repository, then into the remote repositories and will resolve it.
      *
      * @param project         the project
-     * @param localRepository the local repository
-     * @param repositories    the remote repositories
+     * @param remoteRepositories    the remote repositories
      * @return the locale file resolved into the local repository
      * @throws ThirdPartyToolException if any
      */
-    File resolvThirdPartyDescriptor( MavenProject project, ArtifactRepository localRepository,
-                                     List<ArtifactRepository> repositories )
+    File resolvThirdPartyDescriptor( MavenProject project, List<RemoteRepository> remoteRepositories )
             throws ThirdPartyToolException;
 
     File resolveMissingLicensesDescriptor( String groupId, String artifactId, String version,
-                                           ArtifactRepository localRepository, List<ArtifactRepository> repositories )
+                                     List<RemoteRepository> remoteRepositories )
             throws IOException, ArtifactResolutionException, ArtifactNotFoundException;
 
     /**
@@ -234,10 +230,4 @@ public interface ThirdPartyTool
      * @param aetherRepoSession The repo session
      */
     void setAetherRepoSession( RepositorySystemSession aetherRepoSession );
-
-    /**
-     * Sets the remote repositories the tool will use.
-     * @param repositories The repositories
-     */
-    void setRemoteRepositories( List<RemoteRepository> repositories );
 }

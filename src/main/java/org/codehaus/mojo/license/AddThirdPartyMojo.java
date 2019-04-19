@@ -442,7 +442,6 @@ public class AddThirdPartyMojo extends AbstractAddThirdPartyMojo implements Mave
         resolvedOverrideUrl  = mojo.resolvedOverrideUrl;
         missingLicensesFileArtifact = mojo.missingLicensesFileArtifact;
         localRepository = mojo.localRepository;
-        remoteRepositories = mavenProject.getRemoteArtifactRepositories();
         dependencies = new HashSet<>( mavenProject.getDependencyArtifacts() );
         licenseMerges = mojo.licenseMerges;
         licenseMergesFile = mojo.licenseMergesFile;

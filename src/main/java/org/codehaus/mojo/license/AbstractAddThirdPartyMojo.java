@@ -60,7 +60,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import org.codehaus.mojo.license.api.DependenciesToolException;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.repository.RemoteRepository;
 
 /**
  * Abstract mojo for all third-party mojos.
@@ -595,14 +594,6 @@ public abstract class AbstractAddThirdPartyMojo
     protected ArtifactRepository localRepository;
 
     /**
-     * Remote repositories used for the project.
-     *
-     * @since 1.0.0
-     */
-    @Parameter( property = "project.remoteArtifactRepositories", required = true, readonly = true )
-    protected List<ArtifactRepository> remoteRepositories;
-
-    /**
      * The set of dependencies for the current project, used to locate license databases.
      */
     @Parameter( property = "project.artifacts", required = true, readonly = true )
@@ -613,13 +604,6 @@ public abstract class AbstractAddThirdPartyMojo
      */
     @Parameter( defaultValue = "${repositorySystemSession}", required = true, readonly = true )
     private RepositorySystemSession aetherRepoSession;
-
-    /**
-     * The project's remote repositories
-     */
-    @Parameter( defaultValue = "${project.remoteProjectRepositories}",
-            required = true, readonly = true )
-    private List<RemoteRepository> remoteRepos;
 
     // ----------------------------------------------------------------------
     // Plexus components
@@ -898,15 +882,6 @@ public abstract class AbstractAddThirdPartyMojo
         thirdPartyTool.setAetherRepoSession( aetherRepoSession );
     }
 
-    /**
-     * Set the remote repositories in the components that need it.
-     * @param remoteRepositories The remote repositories
-     */
-    public void setRemoteRepos( List<RemoteRepository> remoteRepositories ) {
-        remoteRepos = remoteRepositories;
-        thirdPartyTool.setRemoteRepositories( remoteRepos );
-    }
-
     // ----------------------------------------------------------------------
     // Protected Methods
     // ----------------------------------------------------------------------
@@ -916,7 +891,8 @@ public abstract class AbstractAddThirdPartyMojo
         if ( helper == null )
         {
             helper = new DefaultThirdPartyHelper( getProject(), getEncoding(), isVerbose(), dependenciesTool,
-                    thirdPartyTool, localRepository, remoteRepositories, getLog() );
+                    thirdPartyTool, getProject().getRemoteArtifactRepositories(),
+                    getProject().getRemoteProjectRepositories(), getLog() );
         }
         return helper;
     }
@@ -925,7 +901,7 @@ public abstract class AbstractAddThirdPartyMojo
       throws ArtifactNotFoundException, IOException, ArtifactResolutionException, MojoExecutionException
     {
         File missingLicensesFromArtifact = thirdPartyTool.resolveMissingLicensesDescriptor( groupId, artifactId,
-                version, localRepository, remoteRepositories );
+                version, getProject().getRemoteProjectRepositories() );
         resolveUnsafeDependenciesFromFile( missingLicensesFromArtifact );
     }
 
