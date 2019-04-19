@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -171,6 +172,7 @@ extends AbstractLogEnabled
                 {
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRepositorySession( aetherRepoSession )
+                            .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
                             .setRemoteRepositories( remoteRepositories );
                     depMavenProject =
                         mavenProjectBuilder.build(artifact, true, req).getProject();

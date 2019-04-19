@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -85,7 +86,6 @@ public class LicensedArtifactResolver
      */
     public void loadProjectDependencies( ResolvedProjectDependencies artifacts,
                                                                   MavenProjectDependenciesConfigurator configuration,
-                                                                  ArtifactRepository localRepository,
                                                                   List<ArtifactRepository> remoteRepositories,
                                                                   Map<String, LicensedArtifact> result )
     {
@@ -161,7 +161,7 @@ public class LicensedArtifactResolver
                 {
                     ProjectBuildingRequest req = new DefaultProjectBuildingRequest()
                             .setRemoteRepositories( remoteRepositories )
-                            .setLocalRepository( localRepository )
+                            .setValidationLevel( ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL )
                             .setRepositorySession( aetherRepoSession );
 
                     final MavenProject project = mavenProjectBuilder.build( artifact, true, req ).getProject();

@@ -117,7 +117,7 @@ public class AggregateDownloadLicensesMojo
         {
             licensedArtifactResolver.loadProjectDependencies( new ResolvedProjectDependencies( p.getArtifacts(),
                                                                                        p.getDependencyArtifacts() ),
-                                                      this, localRepository, remoteRepositories, result );
+                                                      this, remoteRepositories, result );
         }
         return result;
     }
